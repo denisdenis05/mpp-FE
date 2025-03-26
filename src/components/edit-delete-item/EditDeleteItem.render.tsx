@@ -5,18 +5,23 @@ import {
   TrashIcon,
 } from "./EditDeleteItem.style";
 import { useRouter } from "next/navigation";
+import { deleteItem } from "./EditDeleteItem.utils";
 
-const EditDeleteItem = ({ index }: { index: number }) => {
-  const { data, updateData, updateIndex } = useData();
+const EditDeleteItem = ({
+  index,
+  refresh,
+}: {
+  index: number;
+  refresh: any;
+}) => {
+  const { updateData, updateIndex, getData } = useData();
   const router = useRouter();
 
-  const deleteItem = () => {
-    console.log(index);
-    const newData = data;
-    newData.splice(index, 1);
+  const handleDelete = () => {
+    const newData = deleteItem(getData(), index);
     console.log(newData);
     updateData(newData);
-    router.push("/admin");
+    refresh(newData);
   };
 
   const editItem = () => {
@@ -26,7 +31,7 @@ const EditDeleteItem = ({ index }: { index: number }) => {
 
   return (
     <EditDeleteContainer>
-      <PenIcon onClick={editItem} /> <TrashIcon onClick={deleteItem} />
+      <PenIcon onClick={editItem} /> <TrashIcon onClick={handleDelete} />
     </EditDeleteContainer>
   );
 };

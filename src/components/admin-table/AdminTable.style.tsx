@@ -4,8 +4,55 @@ const TableContainer = styled.div`
   display: flex;
   justify-content: center;
   margin: 20px;
-  max-height: 80%;
+  max-height: 60%;
   overflow-y: auto;
+`;
+
+const FilterContainer = styled.div`
+  position: relative;
+  width: 100vw;
+`;
+
+const FilterButton = styled.div`
+  height: 55px;
+  width: 55px;
+  border-radius: 9px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 100%;
+  left: 80%;
+`;
+
+const AddButton = styled.a`
+  color: inherit;
+  text-decoration: none;
+  background-color: #9a8282;
+  height: 40px;
+  width: 120px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+
+  &:visited {
+    color: inherit;
+  }
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  &:active {
+    color: inherit;
+  }
+  box-shadow: none;
+  font-family: inherit;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
 `;
 
 const StyledTable = styled.table`
@@ -49,4 +96,11 @@ const TableRow = styled.tr`
   }
 `;
 
-export { TableContainer, StyledTable, TableRow };
+export {
+  TableContainer,
+  AddButton,
+  StyledTable,
+  TableRow,
+  FilterContainer,
+  FilterButton,
+};

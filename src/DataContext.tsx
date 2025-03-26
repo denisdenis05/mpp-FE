@@ -14,6 +14,7 @@ interface DataContextType {
   data: DataItem[];
   index: number;
   setData: (data: DataItem[]) => void;
+  getData: () => DataItem[];
   updateData: (newData: DataItem[]) => void;
   updateIndex: (newIndex: number) => void;
 }
@@ -193,11 +194,16 @@ export function DataProvider({ children }: DataProviderProps) {
     setIndex(newIndex);
   };
 
+  const getData = () => {
+    return data;
+  };
+
   const value: DataContextType = {
     data,
     index,
     setData,
     updateData,
+    getData,
     updateIndex,
   };
 

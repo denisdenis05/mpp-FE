@@ -24,33 +24,4 @@ const Title = styled.p`
   font-size: 30px;
 `;
 
-const AddButton = styled.a`
-  color: inherit;
-  text-decoration: none;
-  background-color: #9a8282;
-  height: 40px;
-  width: 120px;
-  border-radius: 5px;
-  border: none;
-  outline: none;
-
-  &:visited {
-    color: inherit;
-  }
-
-  &:hover {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  &:active {
-    color: inherit;
-  }
-  box-shadow: none;
-  font-family: inherit;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-`;
-
-export { Title, AddButton, MainContainer, DashboardContainer };
+export { Title, MainContainer, DashboardContainer };

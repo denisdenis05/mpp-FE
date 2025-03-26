@@ -8,6 +8,24 @@ const TableContainer = styled.div`
   overflow-y: auto;
 `;
 
+const FilterContainer = styled.div`
+  position: relative;
+  width: 100vw;
+`;
+
+const FilterButton = styled.div`
+  height: 55px;
+  width: 55px;
+  border-radius: 9px;
+  background-color: #d9d9d9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 100%;
+  left: 80%;
+`;
+
 const StyledTable = styled.table`
   border-collapse: collapse;
   width: 100%;
@@ -49,4 +67,4 @@ const TableRow = styled.tr`
   }
 `;
 
-export { TableContainer, StyledTable, TableRow };
+export { TableContainer, StyledTable, TableRow, FilterContainer, FilterButton };

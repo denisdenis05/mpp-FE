@@ -11,6 +11,7 @@ import {
 import InputField from "@/components/input-field";
 import { useEffect, useState } from "react";
 import { useData } from "@/DataContext";
+import { validateData } from "../add-movie/add-movie-page.utils";
 
 const AddPage = () => {
   const router = useRouter();
@@ -24,21 +25,23 @@ const AddPage = () => {
   const [rating, setRating] = useState<string>("0");
 
   const editEntry = () => {
-    data.splice(index, 1);
+    if (validateData(title, director, writer, genre, MPA, rating) === true) {
+      data.splice(index, 1);
 
-    updateData(
-      data.concat([
-        {
-          Title: title,
-          Director: director,
-          Writer: writer,
-          Genre: genre,
-          MPA: MPA,
-          Rating: parseInt(rating),
-        },
-      ])
-    );
-    router.push("/admin");
+      updateData(
+        data.concat([
+          {
+            Title: title,
+            Director: director,
+            Writer: writer,
+            Genre: genre,
+            MPA: MPA,
+            Rating: parseInt(rating),
+          },
+        ])
+      );
+      router.push("/admin");
+    }
   };
   useEffect(() => {
     setTitle(data[index].Title);

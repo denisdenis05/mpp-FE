@@ -11,6 +11,7 @@ import {
 import InputField from "@/components/input-field";
 import { useState } from "react";
 import { useData } from "@/DataContext";
+import { addEntry, validateData } from "./add-movie-page.utils";
 
 const AddPage = () => {
   const router = useRouter();
@@ -23,20 +24,20 @@ const AddPage = () => {
   const [MPA, setMPA] = useState<string>("");
   const [rating, setRating] = useState<string>("0");
 
-  const addEntry = () => {
-    updateData(
-      data.concat([
-        {
-          Title: title,
-          Director: director,
-          Writer: writer,
-          Genre: genre,
-          MPA: MPA,
-          Rating: parseInt(rating),
-        },
-      ])
-    );
-    router.push("/admin");
+  const handleAdd = () => {
+    if (validateData(title, director, writer, genre, MPA, rating) === true) {
+      const newData = addEntry(
+        data,
+        title,
+        director,
+        writer,
+        genre,
+        MPA,
+        rating
+      );
+      updateData(newData);
+      router.push("/admin");
+    }
   };
 
   return (
@@ -81,7 +82,7 @@ const AddPage = () => {
               value={rating}
             />
           </AutoGrid>
-          <AddButton onClick={addEntry}>Add new</AddButton>
+          <AddButton onClick={handleAdd}>Add new</AddButton>
         </DashboardContainer>
       </MainContainer>
     </>
