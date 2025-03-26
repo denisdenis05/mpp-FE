@@ -12,6 +12,7 @@ import EditDeleteItem from "../edit-delete-item";
 import FilterIcon from "../../assets/filter.svg";
 import { getBackgroundColor } from "@/utils";
 import Chart from "../chart";
+import FilterModal from "../filter-modal";
 
 interface EditableTableProps {
   columns: string[];
@@ -24,6 +25,8 @@ const AdminTable = ({ columns, data, onDataChange }: EditableTableProps) => {
   const [visibleRows, setVisibleRows] = useState(data);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [ascending, setAscending] = useState(false);
+  const [selectedColumn, setSelectedColumn] = useState(columns[0]);
+  const [filterText, setFilterText] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [stats, setStats] = useState({ max: 0, min: 10, average: 0 });
 
@@ -82,6 +85,18 @@ const AdminTable = ({ columns, data, onDataChange }: EditableTableProps) => {
     );
     setTableData(updatedData);
     if (onDataChange) onDataChange(updatedData);
+  };
+
+  const filterData = () => {
+    const newData = [...data].filter((a) =>
+      a[selectedColumn]
+        ?.toString()
+        .toLowerCase()
+        .includes(filterText.toLowerCase())
+    );
+
+    setTableData(newData);
+    setAscending(!ascending);
   };
 
   return (
@@ -156,8 +171,16 @@ const AdminTable = ({ columns, data, onDataChange }: EditableTableProps) => {
         </StyledTable>
       </TableContainer>
       <AddButton href="/add-movie">Add new</AddButton>
-
       <Chart data={data} stats={stats} />
+      {isFilterModalOpen && (
+        <FilterModal
+          selectedColumn={selectedColumn}
+          setSelectedColumn={setSelectedColumn}
+          filterText={filterText}
+          setFilterText={setFilterText}
+          filterData={filterData}
+        />
+      )}
     </>
   );
 };
