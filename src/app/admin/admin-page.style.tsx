@@ -3,7 +3,7 @@ import { Joan } from "next/font/google";
 
 const MainContainer = styled.div`
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   box-sizing: border-box;
   align-items: center;
   text-align: center;

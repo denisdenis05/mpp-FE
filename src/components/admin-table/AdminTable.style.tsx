@@ -4,8 +4,7 @@ const TableContainer = styled.div`
   display: flex;
   justify-content: center;
   margin: 20px;
-  max-height: 60%;
-  overflow-y: auto;
+  max-height: 40vh;
 `;
 
 const FilterContainer = styled.div`
@@ -57,6 +56,7 @@ const AddButton = styled.a`
 
 const StyledTable = styled.table`
   border-collapse: collapse;
+  min-height: 30vh;
   width: 100%;
   text-align: left;
   padding: 100px;
@@ -96,6 +96,29 @@ const TableRow = styled.tr`
   }
 `;
 
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+  gap: 10px;
+`;
+
+const PageButton = styled.button`
+  background-color: #9a8282;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
 export {
   TableContainer,
   AddButton,
@@ -103,4 +126,6 @@ export {
   TableRow,
   FilterContainer,
   FilterButton,
+  PaginationContainer,
+  PageButton,
 };

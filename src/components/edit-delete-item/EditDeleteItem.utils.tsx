@@ -1,7 +1,19 @@
-export const deleteItem = (data: any, index: number) => {
-  console.log(data);
-  const newData = [...data];
-  newData.splice(index, 1);
+import axios from "axios";
 
-  return newData;
+export const deleteItem = async (index: number) => {
+  const updatedMovie = {
+    id: index,
+  };
+
+  try {
+    const response = await axios.delete(`http://localhost:5249/Movies/delete`, {
+      data: updatedMovie,
+    });
+
+    console.log("Movie updated successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating movie:", error);
+    throw error;
+  }
 };

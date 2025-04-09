@@ -15,11 +15,27 @@ export const MOVIE_FIELD_TITLES = {
   RATING: "Rating",
 };
 
-export const COLUMNS = [
-  "Title",
-  "Director",
-  "Writer",
-  "Genre",
-  "MPA",
-  "Rating",
+export interface Movie {
+  id: number;
+  title: string;
+  director: string;
+  writer: string;
+  genre: string;
+  mpa: string;
+  rating: number;
+}
+
+export interface MovieApiResponse {
+  results: Movie[];
+  numberFound: number;
+  numberRetrieved: number;
+}
+
+export const COLUMNS: (keyof Movie)[] = [
+  "title",
+  "director",
+  "writer",
+  "genre",
+  "mpa",
+  "rating",
 ];

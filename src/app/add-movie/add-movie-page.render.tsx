@@ -4,6 +4,7 @@ import {
   AddButton,
   AutoGrid,
   DashboardContainer,
+  ErrorText,
   LogoImage,
   MainContainer,
   Title,
@@ -23,19 +24,14 @@ const AddPage = () => {
   const [genre, setGenre] = useState<string>("");
   const [MPA, setMPA] = useState<string>("");
   const [rating, setRating] = useState<string>("0");
+  const [error, setError] = useState<string>("");
 
-  const handleAdd = () => {
-    if (validateData(title, director, writer, genre, MPA, rating) === true) {
-      const newData = addEntry(
-        data,
-        title,
-        director,
-        writer,
-        genre,
-        MPA,
-        rating
-      );
-      updateData(newData);
+  const handleAdd = async () => {
+    if (
+      validateData(title, director, writer, genre, MPA, rating, setError) ===
+      true
+    ) {
+      await addEntry(data, title, director, writer, genre, MPA, rating);
       router.push("/admin");
     }
   };
@@ -83,6 +79,7 @@ const AddPage = () => {
             />
           </AutoGrid>
           <AddButton onClick={handleAdd}>Add new</AddButton>
+          {error != "" && <ErrorText>{error}</ErrorText>}
         </DashboardContainer>
       </MainContainer>
     </>

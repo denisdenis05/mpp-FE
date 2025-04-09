@@ -35,6 +35,11 @@ const Title = styled.p`
   font-size: 30px;
 `;
 
+const ErrorText = styled.p`
+  font-size: 15px;
+  color: red;
+`;
+
 const LogoImage = styled(Logo)`
   transform: scale(0.7);
   position: absolute;
@@ -65,4 +70,5 @@ export {
   DashboardContainer,
   LogoImage,
   AutoGrid,
+  ErrorText,
 };

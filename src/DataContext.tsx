@@ -13,6 +13,8 @@ interface DataItem {
 interface DataContextType {
   data: DataItem[];
   index: number;
+  pageNumber: any;
+  updatePageNumber: (newIndex: number) => void;
   setData: (data: DataItem[]) => void;
   getData: () => DataItem[];
   updateData: (newData: DataItem[]) => void;
@@ -185,12 +187,17 @@ const mockData = [
 export function DataProvider({ children }: DataProviderProps) {
   const [data, setData] = useState<DataItem[]>(mockData);
   const [index, setIndex] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(0);
 
   const updateData = (newData: DataItem[]) => {
     setData(newData);
   };
 
   const updateIndex = (newIndex: number) => {
+    setIndex(newIndex);
+  };
+
+  const updatePageNumber = (newIndex: number) => {
     setIndex(newIndex);
   };
 
@@ -201,7 +208,9 @@ export function DataProvider({ children }: DataProviderProps) {
   const value: DataContextType = {
     data,
     index,
+    pageNumber,
     setData,
+    updatePageNumber,
     updateData,
     getData,
     updateIndex,

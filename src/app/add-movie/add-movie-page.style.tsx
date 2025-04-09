@@ -31,19 +31,13 @@ const AutoGrid = styled.div`
   gap: 2%;
 `;
 
-const AutoGrids = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  grid-auto-rows: minmax(100px, auto);
-  grid-auto-flow: row dense;
-  grid-template-rows: repeat(3, auto);
-  gap: 1rem;
-  max-height: calc(2 * (100px + 1rem));
-  overflow: hidden;
-`;
-
 const Title = styled.p`
   font-size: 30px;
+`;
+
+const ErrorText = styled.p`
+  font-size: 15px;
+  color: red;
 `;
 
 const LogoImage = styled(Logo)`
@@ -76,4 +70,5 @@ export {
   DashboardContainer,
   LogoImage,
   AutoGrid,
+  ErrorText,
 };

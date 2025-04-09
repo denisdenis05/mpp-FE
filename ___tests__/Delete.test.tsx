@@ -1,4 +1,4 @@
-import { deleteItem } from "../edit-delete-item/EditDeleteItem.utils";
+import { deleteItem } from "../src/components/edit-delete-item/EditDeleteItem.utils";
 
 test("remove first movie entry", () => {
   const initialData = [

@@ -14,17 +14,16 @@ const EditDeleteItem = ({
   index: number;
   refresh: any;
 }) => {
-  const { updateData, updateIndex, getData } = useData();
+  const { updateData, updateIndex, updatePageNumber, getData } = useData();
   const router = useRouter();
 
-  const handleDelete = () => {
-    const newData = deleteItem(getData(), index);
-    console.log(newData);
-    updateData(newData);
-    refresh(newData);
+  const handleDelete = async () => {
+    await deleteItem(index);
+    refresh();
   };
 
   const editItem = () => {
+    console.log(index);
     updateIndex(index);
     router.push("/edit-movie");
   };

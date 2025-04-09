@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import InputField from "../input-field";
+import InputField from "../src/components/input-field";
 
 describe("InputField Component", () => {
   test("calls onChange when input value changes (text input)", () => {

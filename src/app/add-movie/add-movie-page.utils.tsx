@@ -1,4 +1,6 @@
-export const addEntry = (
+import axios from "axios";
+
+export const addEntry = async (
   data: any,
   title: any,
   director: any,
@@ -7,21 +9,32 @@ export const addEntry = (
   MPA: any,
   rating: any
 ) => {
-  return data.concat([
-    {
-      Title: title,
-      Director: director,
-      Writer: writer,
-      Genre: genre,
-      MPA: MPA,
-      Rating: parseInt(rating),
-    },
-  ]);
+  const addedMovie = {
+    title,
+    director,
+    writer,
+    genre,
+    MPA,
+    rating,
+  };
+
+  try {
+    const response = await axios.post(
+      `http://localhost:5249/Movies/add`,
+      addedMovie
+    );
+
+    console.log("Movie added successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error added movie:", error);
+    throw error;
+  }
 };
 
 const validMPARatings = ["G", "PG", "PG-13", "R", "NC-17"];
 
-export const validateData = (
+const validateFields = (
   title: any,
   director: any,
   writer: any,
@@ -36,4 +49,20 @@ export const validateData = (
   if (director.length < 3 || director.length > 50) return false;
   if (title.length < 3 || title.length > 50) return false;
   return true;
+};
+
+export const validateData = (
+  title: any,
+  director: any,
+  writer: any,
+  genre: any,
+  MPA: any,
+  rating: any,
+  setError: any
+) => {
+  const valid = validateFields(title, director, writer, genre, MPA, rating);
+  if (valid == false) setError("Data not valid.");
+  else setError("");
+
+  return valid;
 };

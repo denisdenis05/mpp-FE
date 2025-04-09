@@ -1,9 +1,15 @@
 import { useRouter } from "next/navigation";
-import { EDIT_MOVIE_TITLE, MOVIE_FIELD_TITLES } from "../../constants";
+import {
+  EDIT_MOVIE_TITLE,
+  Movie,
+  MOVIE_FIELD_TITLES,
+  MovieApiResponse,
+} from "../../constants";
 import {
   AddButton,
   AutoGrid,
   DashboardContainer,
+  ErrorText,
   LogoImage,
   MainContainer,
   Title,
@@ -12,45 +18,90 @@ import InputField from "@/components/input-field";
 import { useEffect, useState } from "react";
 import { useData } from "@/DataContext";
 import { validateData } from "../add-movie/add-movie-page.utils";
+import { updateEntry } from "./edit-movie-page.utils";
+import axios from "axios";
 
 const AddPage = () => {
   const router = useRouter();
-  const { data, index, updateData } = useData();
+  const { index, updateData } = useData();
 
+  const [data, setData] = useState<Movie[]>([]);
   const [title, setTitle] = useState<string>("");
   const [director, setDirector] = useState<string>("");
   const [writer, setWriter] = useState<string>("");
   const [genre, setGenre] = useState<string>("");
   const [MPA, setMPA] = useState<string>("");
   const [rating, setRating] = useState<string>("0");
+  const [error, setError] = useState<string>("");
 
-  const editEntry = () => {
-    if (validateData(title, director, writer, genre, MPA, rating) === true) {
-      data.splice(index, 1);
-
-      updateData(
-        data.concat([
-          {
-            Title: title,
-            Director: director,
-            Writer: writer,
-            Genre: genre,
-            MPA: MPA,
-            Rating: parseInt(rating),
-          },
-        ])
+  const editEntry = async () => {
+    if (
+      validateData(title, director, writer, genre, MPA, rating, setError) ===
+      true
+    ) {
+      await updateEntry(
+        data,
+        index,
+        title,
+        director,
+        writer,
+        genre,
+        MPA,
+        rating
       );
       router.push("/admin");
     }
   };
+
   useEffect(() => {
-    setTitle(data[index].Title);
-    setDirector(data[index].Director);
-    setWriter(data[index].Writer);
-    setGenre(data[index].Genre);
-    setMPA(data[index].MPA);
-    setRating(data[index].Rating.toString());
+    const fetchData = async () => {
+      const requestBody = {
+        onlyCount: false,
+        paging: {
+          pageSize: 1,
+          pageNumber: 1,
+        },
+        filtering: [
+          {
+            fieldToFilterBy: "Id",
+            value: index.toString(),
+            operation: "eq",
+          },
+        ],
+        sorting: {
+          fieldToSortBy: "Id",
+          order: "asc",
+        },
+      };
+
+      try {
+        const response = await axios.post<MovieApiResponse>(
+          "http://localhost:5249/Movies/filter",
+          requestBody
+        );
+
+        const movies = response.data.results;
+        setData(movies);
+      } catch (err) {
+        console.error("axios error:", err);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      const movie = data[0];
+
+      setTitle(movie.title);
+      setDirector(movie.director);
+      setWriter(movie.writer);
+      setGenre(movie.genre);
+      setMPA(movie.mpa);
+      setRating(movie.rating.toString());
+    }
+  }, [data]);
 
   return (
     <>
@@ -95,6 +146,7 @@ const AddPage = () => {
             />
           </AutoGrid>
           <AddButton onClick={editEntry}>Edit</AddButton>
+          {error != "" && <ErrorText>{error}</ErrorText>}
         </DashboardContainer>
       </MainContainer>
     </>

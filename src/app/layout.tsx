@@ -22,6 +22,7 @@ export default function RootLayout({
             margin: 0;
             font-family: 'Joan', sans-serif;
             box-sizing: border-box;
+            min-height: 100vh;
           }
           *, *::before, *::after {
             box-sizing: border-box;

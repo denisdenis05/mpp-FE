@@ -38,7 +38,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "svg.d.ts"
-  ],
+, "__mocks__/svgMock.js"  ],
   "exclude": [
     "node_modules"
   ]

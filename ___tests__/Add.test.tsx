@@ -1,4 +1,4 @@
-import { addEntry } from "../../app/add-movie/add-movie-page.utils";
+import { addEntry } from "../src/app/add-movie/add-movie-page.utils";
 
 test("add a movie entry", () => {
   const initialData = [
