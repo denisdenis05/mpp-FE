@@ -21,6 +21,8 @@ import axios from "axios";
 import { Movie, MovieApiResponse } from "@/constants";
 import { saveDataToLocalStorage } from "@/DataCaching";
 import { useStatsSocket } from "@/DataBroadcasting";
+import InfiniteScroll from "react-infinite-scroll-component";
+import FileUpload from "../file-upload";
 
 interface EditableTableProps {
   columns: (keyof Movie)[];
@@ -32,7 +34,7 @@ const AdminTable = ({ columns }: EditableTableProps) => {
   const [visibleRows, setVisibleRows] = useState<Movie[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [ascending, setAscending] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<keyof Movie>("title");
@@ -42,8 +44,9 @@ const AdminTable = ({ columns }: EditableTableProps) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [stats, setStats] = useState({ max: 0, min: 10, average: 0 });
   const [isOnline, setIsOnline] = useState<boolean | null>(null);
+  const [offlineIssue, setOfflineIssue] = useState("");
   const router = useRouter();
-  const { histogramData, pieData, topWriters } = useStatsSocket();
+  const { histogramData, pieData, topWriters } = useStatsSocket(isOnline);
 
   const checkServerStatus = async () => {
     try {
@@ -52,21 +55,40 @@ const AdminTable = ({ columns }: EditableTableProps) => {
       if (response.status === 200) {
         console.log("Server is up and running!");
         setIsOnline(true);
+        setOfflineIssue("");
+
         return true;
       } else {
         console.log("Server returned a non-200 response:", response.status);
         return false;
       }
     } catch (error: any) {
-      console.log("here");
       setIsOnline(false);
+
       if (!error.response) {
-        console.log("Network issue or server down, unable to reach server");
+        if (error.code === "ECONNABORTED") {
+          setOfflineIssue("network");
+          console.log(
+            "Request timed out. Possibly server overload or slow network."
+          );
+        } else if (error.message.includes("Network Error")) {
+          setOfflineIssue("network");
+          console.log("Network is unreachable or DNS resolution failed.");
+        } else {
+          setOfflineIssue("network");
+          console.log("Unknown network/server access issue:", error.message);
+        }
       } else if (error.response.status >= 500) {
-        console.log("Server is down (5xx status code)", error.response.status);
+        setOfflineIssue("server");
+        console.log(
+          "Server is down or crashed (5xx error):",
+          error.response.status
+        );
       } else {
-        console.log("Request failed with status:", error.response.status);
+        setOfflineIssue("server");
+        console.log("Server responded with an error:", error.response.status);
       }
+
       return false;
     }
   };
@@ -114,8 +136,13 @@ const AdminTable = ({ columns }: EditableTableProps) => {
 
       const movies = response.data.results;
       setTotalPages(Math.ceil(response.data.numberFound / rowsPerPage));
-      setData(movies);
-      setTableData(movies);
+      if (currentPage === 1) {
+        setData(movies);
+        setTableData(movies);
+      } else {
+        setData((prev) => [...prev, ...movies]);
+        setTableData((prev) => [...prev, ...movies]);
+      }
     } catch (err) {
       console.error("axios error:", err);
     }
@@ -145,7 +172,13 @@ const AdminTable = ({ columns }: EditableTableProps) => {
 
         if (storedData) {
           const parsedData: Movie[] = JSON.parse(storedData);
-          setData(parsedData);
+          if (currentPage === 1) {
+            setData(parsedData);
+            setTableData(parsedData);
+          } else {
+            setData((prev) => [...prev, ...parsedData]);
+            setTableData((prev) => [...prev, ...parsedData]);
+          }
           setTotalPages(JSON.parse(localStorage.getItem("totalPages")!));
           setStats(JSON.parse(localStorage.getItem("stats")!));
         }
@@ -179,58 +212,74 @@ const AdminTable = ({ columns }: EditableTableProps) => {
   return (
     <>
       {!isOnline && <p>OFFLINE MODE</p>}
+      {offlineIssue == "network" && <p>NETWORK ISSUES</p>}
+      {offlineIssue == "server" && <p>SERVER ISSUES</p>}
       <FilterContainer>
         <FilterButton onClick={() => setIsFilterModalOpen(!isFilterModalOpen)}>
           <FilterIcon />
         </FilterButton>
       </FilterContainer>
-      <TableContainer ref={tableContainerRef}>
-        <StyledTable>
-          <thead>
-            <tr>
-              {columns.map((col, index) => (
-                <th
-                  key={index}
-                  style={{ textAlign: index === 0 ? "left" : "center" }}
-                  onClick={() => sortData(col)}
-                >
-                  {col}
-                </th>
-              ))}
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {columns.map((col, colIndex) => (
-                  <td key={col}>
-                    <p
-                      style={{
-                        textAlign: colIndex === 0 ? "left" : "center",
-                        backgroundColor:
-                          col.toLowerCase() === "rating"
-                            ? getBackgroundColor(row[col] as number, stats)
-                            : "transparent",
-                        borderRadius: "5px",
-                      }}
-                    >
-                      {row[col]}
-                    </p>
-                  </td>
+      <TableContainer id="scrollable-table-container" ref={tableContainerRef}>
+        <InfiniteScroll
+          dataLength={data.length}
+          style={{ width: "100%" }}
+          next={() => {
+            console.log("HEI THIS GOT TRIGGERED");
+            setCurrentPage((prev) => prev + 1);
+          }}
+          hasMore={currentPage < totalPages}
+          loader={<h4>Loading...</h4>}
+          endMessage={<p>No more items</p>}
+          scrollableTarget="scrollable-table-container"
+        >
+          <StyledTable>
+            <thead>
+              <tr>
+                {columns.map((col, index) => (
+                  <th
+                    key={index}
+                    style={{ textAlign: index === 0 ? "left" : "center" }}
+                    onClick={() => sortData(col)}
+                  >
+                    {col}
+                  </th>
                 ))}
-                <td>
-                  <EditDeleteItem
-                    index={row.id}
-                    refresh={() => {
-                      fetchData();
-                    }}
-                  />
-                </td>
-              </TableRow>
-            ))}
-          </tbody>
-        </StyledTable>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleRows.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((col, colIndex) => (
+                    <td key={col}>
+                      <p
+                        style={{
+                          textAlign: colIndex === 0 ? "left" : "center",
+                          backgroundColor:
+                            col.toLowerCase() === "rating"
+                              ? getBackgroundColor(row[col] as number, stats)
+                              : "transparent",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        {row[col]}
+                      </p>
+                    </td>
+                  ))}
+                  <td>
+                    <EditDeleteItem
+                      index={row.id}
+                      refresh={() => {
+                        fetchData();
+                      }}
+                    />
+                  </td>
+                </TableRow>
+              ))}
+            </tbody>
+          </StyledTable>
+        </InfiniteScroll>
+
         {isFilterModalOpen && (
           <FilterModal
             selectedColumn={selectedColumn}
@@ -242,28 +291,12 @@ const AdminTable = ({ columns }: EditableTableProps) => {
         )}
       </TableContainer>
 
-      <PaginationContainer>
-        <PageButton
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          Prev
-        </PageButton>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <PageButton
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          Next
-        </PageButton>
-      </PaginationContainer>
-
       <AddButton onClick={() => router.push("/add-movie")}>Add new</AddButton>
       <Chart data={histogramData} />
       <PieChart data={pieData} />
       <TopWritersChart data={topWriters} />
+
+      <FileUpload />
     </>
   );
 };

@@ -5,6 +5,8 @@ const TableContainer = styled.div`
   justify-content: center;
   margin: 20px;
   max-height: 40vh;
+  width: 100%;
+  overflow: auto;
 `;
 
 const FilterContainer = styled.div`
