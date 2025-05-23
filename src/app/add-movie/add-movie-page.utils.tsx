@@ -20,7 +20,7 @@ export const addEntry = async (
 
   try {
     const response = await axios.post(
-      `http://localhost:5249/Movies/add`,
+      process.env.NEXT_PUBLIC_API_URL + `/Movies/add`,
       addedMovie,
       {
         headers: {

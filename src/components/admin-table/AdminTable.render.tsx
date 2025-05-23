@@ -92,7 +92,7 @@ const AdminTable = ({ columns }: EditableTableProps) => {
 
     try {
       const response = await axios.post<MovieApiResponse>(
-        "http://localhost:5249/Movies/filter",
+        process.env.NEXT_PUBLIC_API_URL + "/Movies/filter",
         requestBody,
         {
           headers: {
@@ -102,7 +102,7 @@ const AdminTable = ({ columns }: EditableTableProps) => {
       );
 
       const response2 = await axios.get(
-        "http://localhost:5249/Movies/get-averages",
+        process.env.NEXT_PUBLIC_API_URL + "/get-averages",
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,
@@ -133,7 +133,8 @@ const AdminTable = ({ columns }: EditableTableProps) => {
     setLoadingEndorsements(true);
     try {
       const response = await axios.get<Endorsement[]>(
-        `http://localhost:5249/Movies/get-endorsement?movieId=${movieId}`,
+        process.env.NEXT_PUBLIC_API_URL +
+          `/Movies/get-endorsement?movieId=${movieId}`,
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,

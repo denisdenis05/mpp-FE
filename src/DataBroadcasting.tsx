@@ -8,7 +8,7 @@ export const useStatsSocket = (isOnline: boolean | null) => {
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
-      .withUrl("http://localhost:5249/movieStatsHub")
+      .withUrl(process.env.NEXT_PUBLIC_API_URL + "/movieStatsHub")
       .withAutomaticReconnect()
       .build();
 

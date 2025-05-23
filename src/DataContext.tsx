@@ -20,9 +20,9 @@ interface DataContextType {
   updateData: (newData: DataItem[]) => void;
   updateIndex: (newIndex: number) => void;
   isLoggedIn: () => boolean;
-  getToken: () => string;
+  getToken: () => string | undefined;
   addToken: (token: string) => void;
-  getUsername: () => string;
+  getUsername: () => string | undefined;
   addUsername: (token: string) => void;
 }
 
@@ -44,10 +44,12 @@ export function DataProvider({ children }: DataProviderProps) {
   const isLoggedIn = () => {
     if (token) return true;
 
-    const storedToken = localStorage.getItem("authToken");
-    if (storedToken) {
-      setToken(storedToken);
-      return true;
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("authToken");
+      if (storedToken) {
+        setToken(storedToken);
+        return true;
+      }
     }
 
     return false;
@@ -56,31 +58,43 @@ export function DataProvider({ children }: DataProviderProps) {
   const getToken = () => {
     if (token) return token;
 
-    const storedToken = localStorage.getItem("authToken");
-    if (storedToken) {
-      setToken(storedToken);
-      return storedToken;
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("authToken");
+      if (storedToken) {
+        setToken(storedToken);
+        return storedToken;
+      }
     }
+
+    return undefined;
   };
 
-  const addToken = (token: any) => {
+  const addToken = (token: string) => {
     setToken(token);
-    localStorage.setItem("authToken", token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("authToken", token);
+    }
   };
 
   const getUsername = () => {
-    if (username) return token;
+    if (username) return username;
 
-    const storedToken = localStorage.getItem("username");
-    if (storedToken) {
-      setToken(storedToken);
-      return storedToken;
+    if (typeof window !== "undefined") {
+      const storedUsername = localStorage.getItem("username");
+      if (storedUsername) {
+        setUsername(storedUsername);
+        return storedUsername;
+      }
     }
+
+    return undefined;
   };
 
-  const addUsername = (user: any) => {
-    setToken(user);
-    localStorage.setItem("username", user);
+  const addUsername = (user: string) => {
+    setUsername(user);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("username", user);
+    }
   };
 
   const updateData = (newData: DataItem[]) => {

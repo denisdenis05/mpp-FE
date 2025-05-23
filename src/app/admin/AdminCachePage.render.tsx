@@ -66,8 +66,6 @@ const AdminCachePage = () => {
     "critical",
   ];
 
-
-
   useEffect(() => {
     const intervalId = setInterval(() => {
       checkServerStatus(setIsOnline, setOfflineIssue);
@@ -97,7 +95,7 @@ const AdminCachePage = () => {
 
     try {
       const response = await axios.post<EventLogApiResponse>(
-        "http://localhost:5249/EventLog/filter",
+        process.env.NEXT_PUBLIC_API_URL + "/EventLog/filter",
         requestBody,
         {
           headers: {
@@ -107,7 +105,7 @@ const AdminCachePage = () => {
       );
 
       const responseMonitor = await axios.get(
-        "http://localhost:5249/EventLog/getAllMonitoredUsers",
+        process.env.NEXT_PUBLIC_API_URL + "/EventLog/getAllMonitoredUsers",
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,

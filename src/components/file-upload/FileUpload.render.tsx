@@ -18,7 +18,7 @@ const FileUpload = () => {
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   const fetchFiles = async () => {
-    const res = await axios.get("http://localhost:5249/FileS/all");
+    const res = await axios.get(process.env.NEXT_PUBLIC_API_URL + "/FileS/all");
     setUploadedFiles(res.data);
   };
 
@@ -28,9 +28,13 @@ const FileUpload = () => {
     const formData = new FormData();
     formData.append("file", file);
 
-    await axios.post("http://localhost:5249/Files/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    await axios.post(
+      process.env.NEXT_PUBLIC_API_URL + "/Files/upload",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
 
     setFile(null);
     fetchFiles(); // Refresh list
@@ -38,7 +42,7 @@ const FileUpload = () => {
 
   const downloadFile = async (fileName: string) => {
     const res = await axios.get(
-      `http://localhost:5249/Files/download/${fileName}`,
+      process.env.NEXT_PUBLIC_API_URL + `/Files/download/${fileName}`,
       {
         responseType: "blob",
       }

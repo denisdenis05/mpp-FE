@@ -104,7 +104,7 @@ const AddPage = () => {
 
       try {
         const response = await axios.post<MovieApiResponse>(
-          "http://localhost:5249/Movies/filter",
+          process.env.NEXT_PUBLIC_API_URL + "/Movies/filter",
           requestBody,
           {
             headers: {

@@ -32,23 +32,26 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5249/Auth/login", {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_URL + "/Auth/login",
+        {
+          username,
+          password,
+        }
+      );
 
       if (response.data) {
         if (response.data.username) {
           addUsername(response.data.username);
 
           const response2 = await axios.post(
-            "http://localhost:5249/Auth/is-2fa-enabled",
+            process.env.NEXT_PUBLIC_API_URL + "/Auth/is-2fa-enabled",
             { username }
           );
 
           if (response2.data.result == false) {
             const response3 = await axios.post(
-              "http://localhost:5249/Auth/get-qr-code",
+              process.env.NEXT_PUBLIC_API_URL + "/Auth/get-qr-code",
               { username }
             );
 
@@ -86,7 +89,7 @@ const Login = () => {
 
     if (is2FASuccessfullyEnabled == false) {
       const response = await axios.post(
-        "http://localhost:5249/Auth/enable-2fa",
+        process.env.NEXT_PUBLIC_API_URL + "/Auth/enable-2fa",
         { username, code }
       );
 
@@ -95,7 +98,7 @@ const Login = () => {
 
     try {
       const response2 = await axios.post(
-        "http://localhost:5249/Auth/validate-2fa",
+        process.env.NEXT_PUBLIC_API_URL + "/Auth/validate-2fa",
         { username, code }
       );
 

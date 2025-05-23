@@ -13,7 +13,9 @@ export const checkServerStatus = async (
   setOfflineIssue: any
 ) => {
   try {
-    const response = await axios.get("http://localhost:5249/heartbeat");
+    const response = await axios.get(
+      process.env.NEXT_PUBLIC_API_URL + "/heartbeat"
+    );
 
     if (response.status === 200) {
       console.log("Server is up and running!");
@@ -83,15 +85,21 @@ export const applyOfflineChanges = async () => {
   for (const change of changes) {
     try {
       if (change.type === "edit") {
-        await axios.put(`http://localhost:5249/Movies/edit`, change.payload);
+        await axios.put(
+          process.env.NEXT_PUBLIC_API_URL + `/Movies/edit`,
+          change.payload
+        );
       } else if (change.type === "delete") {
         console.log("DOING DELETE.");
 
-        await axios.delete(`http://localhost:5249/Movies/delete`, {
+        await axios.delete(process.env.NEXT_PUBLIC_API_URL + `/Movies/delete`, {
           data: change.payload,
         });
       } else if (change.type === "add") {
-        await axios.post("http://localhost:5249/Movies/add", change.payload);
+        await axios.post(
+          process.env.NEXT_PUBLIC_API_URL + "/Movies/add",
+          change.payload
+        );
       }
     } catch (err) {
       console.error("Failed to sync change:", change, err);
@@ -120,7 +128,7 @@ export const saveDataToLocalStorage = async (
   localStorage.clear();
 
   const response2 = await axios.get(
-    "http://localhost:5249/Movies/get-averages",
+    process.env.NEXT_PUBLIC_API_URL + "/Movies/get-averages",
     {
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -151,7 +159,7 @@ export const saveDataToLocalStorage = async (
 
     try {
       const response = await axios.post<MovieApiResponse>(
-        "http://localhost:5249/Movies/filter",
+        process.env.NEXT_PUBLIC_API_URL + "/Movies/filter",
         requestBody,
         {
           headers: {

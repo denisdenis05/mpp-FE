@@ -6,12 +6,15 @@ export const deleteItem = async (index: number, getToken: any) => {
   };
 
   try {
-    const response = await axios.delete(`http://localhost:5249/Movies/delete`, {
-      data: updatedMovie,
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
+    const response = await axios.delete(
+      process.env.NEXT_PUBLIC_API_URL + `/Movies/delete`,
+      {
+        data: updatedMovie,
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
 
     console.log("Movie updated successfully:", response.data);
     return response.data;

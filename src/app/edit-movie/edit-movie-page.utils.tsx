@@ -22,7 +22,7 @@ export const updateEntry = async (
 
   try {
     const response = await axios.patch(
-      `http://localhost:5249/Movies/edit`,
+      process.env.NEXT_PUBLIC_API_URL + `/Movies/edit`,
       updatedMovie
     );
 
