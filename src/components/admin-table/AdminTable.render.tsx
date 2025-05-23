@@ -14,18 +14,26 @@ import FilterIcon from "../../assets/filter.svg";
 import { getBackgroundColor } from "@/utils";
 import Chart from "../chart";
 import FilterModal from "../filter-modal";
+import EndorsementsModal from "../endorsement-modal";
 import { useRouter } from "next/navigation";
 import PieChart from "../pie-chart";
 import TopWritersChart from "../top-writers-chart";
 import axios from "axios";
 import { Movie, MovieApiResponse } from "@/constants";
-import { saveDataToLocalStorage } from "@/DataCaching";
+import { checkServerStatus, saveDataToLocalStorage } from "@/DataCaching";
 import { useStatsSocket } from "@/DataBroadcasting";
 import InfiniteScroll from "react-infinite-scroll-component";
 import FileUpload from "../file-upload";
+import { useData } from "@/DataContext";
 
 interface EditableTableProps {
   columns: (keyof Movie)[];
+}
+
+interface Endorsement {
+  endorsementId: number;
+  endorser: number;
+  date: string;
 }
 
 const AdminTable = ({ columns }: EditableTableProps) => {
@@ -47,56 +55,18 @@ const AdminTable = ({ columns }: EditableTableProps) => {
   const [offlineIssue, setOfflineIssue] = useState("");
   const router = useRouter();
   const { histogramData, pieData, topWriters } = useStatsSocket(isOnline);
+  const { getToken } = useData();
+  const [attackTriggered, setAttackTriggered] = useState(false);
 
-  const checkServerStatus = async () => {
-    try {
-      const response = await axios.get("http://localhost:5249/heartbeat");
+  const [isEndorsementsModalOpen, setIsEndorsementsModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [endorsements, setEndorsements] = useState<Endorsement[]>([]);
+  const [loadingEndorsements, setLoadingEndorsements] = useState(false);
 
-      if (response.status === 200) {
-        console.log("Server is up and running!");
-        setIsOnline(true);
-        setOfflineIssue("");
-
-        return true;
-      } else {
-        console.log("Server returned a non-200 response:", response.status);
-        return false;
-      }
-    } catch (error: any) {
-      setIsOnline(false);
-
-      if (!error.response) {
-        if (error.code === "ECONNABORTED") {
-          setOfflineIssue("network");
-          console.log(
-            "Request timed out. Possibly server overload or slow network."
-          );
-        } else if (error.message.includes("Network Error")) {
-          setOfflineIssue("network");
-          console.log("Network is unreachable or DNS resolution failed.");
-        } else {
-          setOfflineIssue("network");
-          console.log("Unknown network/server access issue:", error.message);
-        }
-      } else if (error.response.status >= 500) {
-        setOfflineIssue("server");
-        console.log(
-          "Server is down or crashed (5xx error):",
-          error.response.status
-        );
-      } else {
-        setOfflineIssue("server");
-        console.log("Server responded with an error:", error.response.status);
-      }
-
-      return false;
-    }
-  };
   useEffect(() => {
     const intervalId = setInterval(() => {
-      checkServerStatus();
+      checkServerStatus(setIsOnline, setOfflineIssue);
     }, 5000);
-
     return () => clearInterval(intervalId);
   }, []);
 
@@ -123,16 +93,24 @@ const AdminTable = ({ columns }: EditableTableProps) => {
     try {
       const response = await axios.post<MovieApiResponse>(
         "http://localhost:5249/Movies/filter",
-        requestBody
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
       );
 
       const response2 = await axios.get(
-        "http://localhost:5249/Movies/get-averages"
+        "http://localhost:5249/Movies/get-averages",
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
       );
 
       setStats(response2.data);
-
-      console.log(response2);
 
       const movies = response.data.results;
       setTotalPages(Math.ceil(response.data.numberFound / rowsPerPage));
@@ -145,26 +123,55 @@ const AdminTable = ({ columns }: EditableTableProps) => {
       }
     } catch (err) {
       console.error("axios error:", err);
+      console.log("ATTACK TRIGGERED");
+      setAttackTriggered(true);
+      return;
     }
+  };
+
+  const fetchEndorsements = async (movieId: number) => {
+    setLoadingEndorsements(true);
+    try {
+      const response = await axios.get<Endorsement[]>(
+        `http://localhost:5249/Movies/get-endorsement?movieId=${movieId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+      setEndorsements(response.data);
+    } catch (err) {
+      console.error("Error fetching endorsements:", err);
+      setEndorsements([]);
+    } finally {
+      setLoadingEndorsements(false);
+    }
+  };
+
+  // Handler for row click to open endorsements modal
+  const handleRowClick = (movie: Movie) => {
+    setSelectedMovie(movie);
+    fetchEndorsements(movie.id);
+    setIsEndorsementsModalOpen(true);
   };
 
   useEffect(() => {
     const fetchDataIfConnected = async () => {
-      await checkServerStatus();
+      await checkServerStatus(setIsOnline, setOfflineIssue);
 
       if (isOnline == null) return;
 
       if (isOnline) {
         await fetchData();
-        console.log(isOnline);
-        console.log(localStorage.getItem("page1"));
 
         if (!localStorage.getItem("page1")) {
           saveDataToLocalStorage(
             selectedColumn,
             filterText,
             ascending,
-            rowsPerPage
+            rowsPerPage,
+            getToken
           );
         }
       } else {
@@ -214,6 +221,7 @@ const AdminTable = ({ columns }: EditableTableProps) => {
       {!isOnline && <p>OFFLINE MODE</p>}
       {offlineIssue == "network" && <p>NETWORK ISSUES</p>}
       {offlineIssue == "server" && <p>SERVER ISSUES</p>}
+      {attackTriggered && <p>ATTACK TRIGGERED. YOU ARE BEING RATE LIMITED</p>}
       <FilterContainer>
         <FilterButton onClick={() => setIsFilterModalOpen(!isFilterModalOpen)}>
           <FilterIcon />
@@ -224,7 +232,6 @@ const AdminTable = ({ columns }: EditableTableProps) => {
           dataLength={data.length}
           style={{ width: "100%" }}
           next={() => {
-            console.log("HEI THIS GOT TRIGGERED");
             setCurrentPage((prev) => prev + 1);
           }}
           hasMore={currentPage < totalPages}
@@ -249,7 +256,11 @@ const AdminTable = ({ columns }: EditableTableProps) => {
             </thead>
             <tbody>
               {visibleRows.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
+                <TableRow
+                  key={rowIndex}
+                  onClick={() => handleRowClick(row)}
+                  style={{ cursor: "pointer" }}
+                >
                   {columns.map((col, colIndex) => (
                     <td key={col}>
                       <p
@@ -266,7 +277,7 @@ const AdminTable = ({ columns }: EditableTableProps) => {
                       </p>
                     </td>
                   ))}
-                  <td>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <EditDeleteItem
                       index={row.id}
                       refresh={() => {
@@ -287,6 +298,16 @@ const AdminTable = ({ columns }: EditableTableProps) => {
             filterText={filterText}
             setFilterText={setFilterText}
             filterData={filterData}
+          />
+        )}
+
+        {isEndorsementsModalOpen && selectedMovie && (
+          <EndorsementsModal
+            isOpen={isEndorsementsModalOpen}
+            onClose={() => setIsEndorsementsModalOpen(false)}
+            movie={selectedMovie}
+            endorsements={endorsements}
+            isLoading={loadingEndorsements}
           />
         )}
       </TableContainer>

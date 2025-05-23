@@ -20,10 +20,19 @@ import { useData } from "@/DataContext";
 import { validateData } from "../add-movie/add-movie-page.utils";
 import { updateEntry } from "./edit-movie-page.utils";
 import axios from "axios";
+import { checkServerStatus, saveOfflineChange } from "@/DataCaching";
 
 const AddPage = () => {
   const router = useRouter();
   const { index, updateData } = useData();
+
+  const { isLoggedIn } = useData();
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      router.push("/login");
+    }
+  }, []);
 
   const [data, setData] = useState<Movie[]>([]);
   const [title, setTitle] = useState<string>("");
@@ -33,23 +42,42 @@ const AddPage = () => {
   const [MPA, setMPA] = useState<string>("");
   const [rating, setRating] = useState<string>("0");
   const [error, setError] = useState<string>("");
+  const [isOnline, setIsOnline] = useState(false);
+  const { getToken } = useData();
 
   const editEntry = async () => {
     if (
       validateData(title, director, writer, genre, MPA, rating, setError) ===
       true
     ) {
-      await updateEntry(
-        data,
-        index,
-        title,
-        director,
-        writer,
-        genre,
-        MPA,
-        rating
-      );
-      router.push("/admin");
+      await checkServerStatus(setIsOnline, () => {});
+      if (isOnline) {
+        await updateEntry(
+          data,
+          index,
+          title,
+          director,
+          writer,
+          genre,
+          MPA,
+          rating
+        );
+      } else {
+        saveOfflineChange({
+          type: "edit",
+          payload: {
+            id: index,
+            title,
+            director,
+            writer,
+            genre,
+            mpa: MPA,
+            rating: parseFloat(rating),
+          },
+        });
+      }
+
+      router.push("/home");
     }
   };
 
@@ -77,7 +105,12 @@ const AddPage = () => {
       try {
         const response = await axios.post<MovieApiResponse>(
           "http://localhost:5249/Movies/filter",
-          requestBody
+          requestBody,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
 
         const movies = response.data.results;

@@ -10,13 +10,22 @@ import {
   Title,
 } from "./add-movie-page.style";
 import InputField from "@/components/input-field";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useData } from "@/DataContext";
 import { addEntry, validateData } from "./add-movie-page.utils";
+import { checkServerStatus, saveOfflineChange } from "@/DataCaching";
 
 const AddPage = () => {
   const router = useRouter();
   const { data, updateData } = useData();
+
+  const { isLoggedIn } = useData();
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      router.push("/login");
+    }
+  }, []);
 
   const [title, setTitle] = useState<string>("");
   const [director, setDirector] = useState<string>("");
@@ -25,14 +34,32 @@ const AddPage = () => {
   const [MPA, setMPA] = useState<string>("");
   const [rating, setRating] = useState<string>("0");
   const [error, setError] = useState<string>("");
+  const [isOnline, setIsOnline] = useState(false);
+  const { getToken } = useData();
 
   const handleAdd = async () => {
     if (
       validateData(title, director, writer, genre, MPA, rating, setError) ===
       true
     ) {
-      await addEntry(data, title, director, writer, genre, MPA, rating);
-      router.push("/admin");
+      await checkServerStatus(setIsOnline, () => {});
+      if (isOnline) {
+        await addEntry(getToken, title, director, writer, genre, MPA, rating);
+      } else {
+        saveOfflineChange({
+          type: "add",
+          payload: {
+            title,
+            director,
+            writer,
+            genre,
+            mpa: MPA,
+            rating: parseFloat(rating),
+          },
+        });
+      }
+
+      router.push("/home");
     }
   };
 

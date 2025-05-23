@@ -6,6 +6,8 @@ import {
 } from "./EditDeleteItem.style";
 import { useRouter } from "next/navigation";
 import { deleteItem } from "./EditDeleteItem.utils";
+import { checkServerStatus, saveOfflineChange } from "@/DataCaching";
+import { useState } from "react";
 
 const EditDeleteItem = ({
   index,
@@ -15,11 +17,18 @@ const EditDeleteItem = ({
   refresh: any;
 }) => {
   const { updateData, updateIndex, updatePageNumber, getData } = useData();
+  const [isOnline, setIsOnline] = useState(false);
   const router = useRouter();
+  const { getToken } = useData();
 
   const handleDelete = async () => {
-    await deleteItem(index);
-    refresh();
+    await checkServerStatus(setIsOnline, () => {});
+    if (isOnline) {
+      await deleteItem(index, getToken);
+      refresh();
+    } else {
+      saveOfflineChange({ type: "delete", payload: { id: index } });
+    }
   };
 
   const editItem = () => {

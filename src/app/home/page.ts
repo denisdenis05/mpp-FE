@@ -1,3 +1,3 @@
 "use client";
 
-export { default } from "./home-page.render";
+export { default } from "./admin-page.render";

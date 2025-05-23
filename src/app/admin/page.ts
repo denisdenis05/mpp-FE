@@ -1,3 +1,3 @@
 "use client";
 
-export { default } from "./admin-page.render";
+export { default } from "./AdminCachePage.render";

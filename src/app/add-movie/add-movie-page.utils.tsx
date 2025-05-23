@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const addEntry = async (
-  data: any,
+  getToken: any,
   title: any,
   director: any,
   writer: any,
@@ -21,7 +21,12 @@ export const addEntry = async (
   try {
     const response = await axios.post(
       `http://localhost:5249/Movies/add`,
-      addedMovie
+      addedMovie,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
     );
 
     console.log("Movie added successfully:", response.data);
