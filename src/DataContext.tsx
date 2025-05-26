@@ -25,10 +25,10 @@ interface DataContextType {
   getData: () => DataItem[];
   updateData: (newData: DataItem[]) => void;
   updateIndex: (newIndex: number) => void;
-  isLoggedIn: boolean;
-  getToken: () => string | null;
+  isLoggedIn: () => boolean;
+  getToken: () => string | undefined;
   addToken: (token: string) => void;
-  getUsername: () => string | null;
+  getUsername: () => string | undefined;
   addUsername: (username: string) => void;
   logout: () => void;
 }
@@ -40,8 +40,8 @@ const setCookie = (name: string, value: string, days: number = 7) => {
   document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict;Secure`;
 };
 
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null;
+const getCookie = (name: string): string | undefined => {
+  if (typeof document === "undefined") return undefined;
 
   const nameEQ = name + "=";
   const ca = document.cookie.split(";");
@@ -51,7 +51,7 @@ const getCookie = (name: string): string | null => {
     while (c.charAt(0) === " ") c = c.substring(1, c.length);
     if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
   }
-  return null;
+  return undefined;
 };
 
 const deleteCookie = (name: string) => {
@@ -70,8 +70,8 @@ export function DataProvider({ children }: DataProviderProps) {
   const [data, setData] = useState<DataItem[]>([]);
   const [index, setIndex] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(0);
-  const [token, setToken] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [token, setToken] = useState<string | undefined>(undefined);
+  const [username, setUsername] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const storedToken = getCookie("authToken");
@@ -105,8 +105,8 @@ export function DataProvider({ children }: DataProviderProps) {
   };
 
   const logout = () => {
-    setToken(null);
-    setUsername(null);
+    setToken(undefined);
+    setUsername(undefined);
     deleteCookie("authToken");
     deleteCookie("username");
   };
