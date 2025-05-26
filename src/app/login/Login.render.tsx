@@ -94,6 +94,8 @@ const Login = () => {
       );
 
       if (response.data == false) return;
+
+      console.log(response.data);
     }
 
     try {
@@ -102,6 +104,7 @@ const Login = () => {
         { username, code }
       );
 
+      console.log(response2.data);
       addToken(response2.data);
       router.push("/home");
     } catch {
