@@ -33,7 +33,6 @@ interface DataContextType {
   logout: () => void;
 }
 
-// Cookie utilities
 const setCookie = (name: string, value: string, days: number = 7) => {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);

@@ -102,7 +102,7 @@ const AdminTable = ({ columns }: EditableTableProps) => {
       );
 
       const response2 = await axios.get(
-        process.env.NEXT_PUBLIC_API_URL + "/get-averages",
+        process.env.NEXT_PUBLIC_API_URL + "/Movies/get-averages",
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,

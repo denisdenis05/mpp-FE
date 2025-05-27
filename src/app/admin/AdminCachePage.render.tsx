@@ -47,7 +47,7 @@ const AdminCachePage = () => {
   const [selectedColumn, setSelectedColumn] =
     useState<keyof EventLog>("action");
   const [selectedSortColumn, setSelectedSortColumn] =
-    useState<keyof EventLog>("action");
+    useState<keyof EventLog>("eventCacheId");
   const [filterText, setFilterText] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean | null>(null);
