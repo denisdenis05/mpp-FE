@@ -50,7 +50,7 @@ const AddPage = () => {
       validateData(title, director, writer, genre, MPA, rating, setError) ===
       true
     ) {
-      await checkServerStatus(setIsOnline, () => {});
+      await checkServerStatus(setIsOnline, () => {}, getToken);
       if (isOnline) {
         await updateEntry(
           data,

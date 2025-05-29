@@ -22,7 +22,7 @@ const EditDeleteItem = ({
   const { getToken } = useData();
 
   const handleDelete = async () => {
-    await checkServerStatus(setIsOnline, () => {});
+    await checkServerStatus(setIsOnline, () => {}, getToken);
     if (isOnline) {
       await deleteItem(index, getToken);
       refresh();

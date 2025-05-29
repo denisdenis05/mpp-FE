@@ -68,7 +68,7 @@ const AdminCachePage = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      checkServerStatus(setIsOnline, setOfflineIssue);
+      checkServerStatus(setIsOnline, setOfflineIssue, getToken);
     }, 5000);
     return () => clearInterval(intervalId);
   }, []);
@@ -129,7 +129,7 @@ const AdminCachePage = () => {
 
   useEffect(() => {
     const fetchDataIfConnected = async () => {
-      await checkServerStatus(setIsOnline, setOfflineIssue);
+      await checkServerStatus(setIsOnline, setOfflineIssue, getToken);
 
       if (isOnline == null) return;
       await fetchData();

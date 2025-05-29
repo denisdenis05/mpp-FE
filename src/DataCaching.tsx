@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Movie, MovieApiResponse } from "./constants";
+import { useData } from "./DataContext";
 
 type OfflineChangeType = "add" | "edit" | "delete";
 
@@ -10,7 +11,8 @@ interface OfflineChange {
 
 export const checkServerStatus = async (
   setIsOnline: any,
-  setOfflineIssue: any
+  setOfflineIssue: any,
+  getToken: any,
 ) => {
   try {
     const response = await axios.get(
@@ -19,7 +21,7 @@ export const checkServerStatus = async (
 
     if (response.status === 200) {
       console.log("Server is up and running!");
-      await applyOfflineChanges();
+      await applyOfflineChanges(getToken);
 
       setIsOnline(true);
       setOfflineIssue("");
@@ -74,7 +76,7 @@ export const clearOfflineChanges = () => {
   localStorage.removeItem("offlineChanges");
 };
 
-export const applyOfflineChanges = async () => {
+export const applyOfflineChanges = async (getToken: any) => {
   const stored = localStorage.getItem("offlineChanges");
   if (!stored) return;
   console.log("OFFLINE. CHECKING CHANGES");
@@ -87,18 +89,31 @@ export const applyOfflineChanges = async () => {
       if (change.type === "edit") {
         await axios.put(
           process.env.NEXT_PUBLIC_API_URL + `/Movies/edit`,
-          change.payload
+          change.payload,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
       } else if (change.type === "delete") {
         console.log("DOING DELETE.");
 
         await axios.delete(process.env.NEXT_PUBLIC_API_URL + `/Movies/delete`, {
           data: change.payload,
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
         });
       } else if (change.type === "add") {
         await axios.post(
           process.env.NEXT_PUBLIC_API_URL + "/Movies/add",
-          change.payload
+          change.payload,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
       }
     } catch (err) {
